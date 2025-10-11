@@ -4,7 +4,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from django.forms import ModelForm
 from .models import User, Listing, Bid, Comment
+
+class ListingForm(ModelForm):
+    class Meta:
+        model = Listing
+        fields = ['title', 'description', 'min_price', 'image_url', 'category']
 
 
 def index(request):
@@ -24,7 +30,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("auctions:index"))
         else:
             return render(request, "auctions/login.html", {
                 "message": "Invalid username and/or password."
@@ -35,7 +41,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("auctions:index"))
 
 
 def register(request):
@@ -60,6 +66,19 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse("auctions:index"))
     else:
         return render(request, "auctions/register.html")
+
+def listing_new(request):
+    form = ListingForm()
+    return render(request, "auctions/add_listing.html", {
+        "form": form
+    })
+
+def listing_view(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+
+    return render(request, "auctions/listings.html", {
+        "listing": listing
+    })

@@ -12,7 +12,7 @@
                 </div>
                 <div class="col-sm-6">
 
-                    <a href=""><h2>{{ listing.title }} </h2></a>
+                    <a href="{% url 'auctions:listing' listing.id %}"><h2>{{ listing.title }} </h2></a>
                     <h3>Price: $ {{  listing.min_price }}</h3>
                     <p>{{ listing.description }} </p>
                     <p>Created at {{ listing.created_at }} </p>

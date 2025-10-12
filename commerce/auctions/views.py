@@ -12,6 +12,11 @@ class ListingForm(ModelForm):
         model = Listing
         fields = ['title', 'description', 'min_price', 'image_url', 'category']
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    
 
 def index(request):
     return render(request, "auctions/index.html", {
@@ -70,15 +75,50 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-def listing_new(request):
-    form = ListingForm()
-    return render(request, "auctions/add_listing.html", {
-        "form": form
-    })
-
 def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
     return render(request, "auctions/listings.html", {
         "listing": listing
     })
+
+def listing_new(request):
+    
+    if request.method == 'POST':
+        print('request.method == POST')
+
+        form = ListingForm(request.POST, user=request.user)
+
+        if form.is_valid():
+
+            new_listing = Listing(title=form.cleaned_data['title'], 
+                    description=form.cleaned_data['description'],
+                    min_price = form.cleaned_data['min_price'],
+                    image_url = form.cleaned_data['image_url'],
+                    category = form.cleaned_data['category'],
+                    listed_by = form.user
+                    )
+
+            new_listing.save()
+
+
+
+    form = ListingForm(user=request.user)
+    return render(request, "auctions/add_listing.html", {
+        "form": form
+    })
+
+
+# def listing_add(request):
+
+#     if request.method == 'POST':
+
+#         form = ListingForm(request.POST)
+
+#         if form.is_valid():
+
+
+#     form = ListingForm()
+#     return render(request, "auctions/add_listing.html", {
+#         "form": form
+#     })

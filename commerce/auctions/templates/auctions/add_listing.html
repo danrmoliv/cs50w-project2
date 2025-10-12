@@ -4,7 +4,7 @@
 {% block body %}
     <h2>New Listing</h2>
 
-    <form action="">
+    <form action="{% url 'auctions:new_listing' %}" method="post">
         {% csrf_token %}
         {{ form|bootstrap }}
         <input type="submit" value="Create" class="btn btn-primary">        

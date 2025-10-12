@@ -16,7 +16,16 @@ class ListingForm(ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
 
-    
+class BidForm(ModelForm):
+    class Meta:
+        model = Bid
+        fields = ['bid_value']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+
 
 def index(request):
     return render(request, "auctions/index.html", {
@@ -78,8 +87,11 @@ def register(request):
 def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
+    form_bid = BidForm(user=request.user)
+
     return render(request, "auctions/listings.html", {
-        "listing": listing
+        "listing": listing,
+        'form_bid': form_bid
     })
 
 def listing_new(request):

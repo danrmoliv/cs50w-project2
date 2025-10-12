@@ -1,4 +1,5 @@
 {% extends "auctions/layout.html" %}
+{% load bootstrap %}
 
 {% block body %}
     <h2>Listing: {{listing.title}}</h2>
@@ -7,5 +8,12 @@
 
     <p>{{ listing.description }}</p>
     <h2>$ {{ listing.min_price }}</h2>
+
+    {% if user.is_authenticated %}
+        <form action="">
+            {{ form_bid|bootstrap }}
+            <input type="submit" value="Place Bid" class="btn btn-primary">  
+        </form>
+    {% endif %}
     
 {% endblock %}

@@ -22,6 +22,7 @@ class Bid(models.Model):
     product = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids_on_product")
     bid_value = models.FloatField(blank=False)
     user_bid = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bids_by_user')
+    submited_at = models.DateTimeField(auto_now_add=True) 
 
     def __str__(self):
         return f"{self.product} - Bid: {self.bid_value} - Bid from: {self.user_bid}"

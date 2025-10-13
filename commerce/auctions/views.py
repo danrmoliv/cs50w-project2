@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from django.forms import ModelForm
@@ -108,17 +108,21 @@ def listing_new(request):
                     min_price = form.cleaned_data['min_price'],
                     image_url = form.cleaned_data['image_url'],
                     category = form.cleaned_data['category'],
-                    listed_by = form.user
+                    listed_by = form.user,
+                    highest_bid = 0
                     )
 
             new_listing.save()
 
+            form_bid = BidForm(user=request.user)
 
+        return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": new_listing.id}))
 
-    form = ListingForm(user=request.user)
-    return render(request, "auctions/add_listing.html", {
-        "form": form
-    })
+    else:
+        form = ListingForm(user=request.user)
+        return render(request, "auctions/add_listing.html", {
+            "form": form
+        })
 
 
 # def listing_add(request):

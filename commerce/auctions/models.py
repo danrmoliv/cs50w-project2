@@ -14,6 +14,7 @@ class Listing(models.Model):
     category = models.CharField(max_length=64, blank=True)
     listed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
     created_at = models.DateTimeField(auto_now_add=True) 
+    highest_bid = models.FloatField(blank=True)
 
     def __str__(self):
         return f"{self.title} - Price: {self.min_price} - Listed by: {self.listed_by}"

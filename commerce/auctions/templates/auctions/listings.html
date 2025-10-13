@@ -16,4 +16,15 @@
         </form>
     {% endif %}
     
+    <br>
+    <h2>Details:</h2>
+    <ul>
+        <li>Listed by: {{ listing.listed_by }}</li>
+        {% if listing.category %}
+            <li>Category: {{ listing.category }}</li>
+        {% else %}
+            <li>Category: No Category Listed</li>
+        {% endif %}
+    </ul>
+    
 {% endblock %}

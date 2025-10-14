@@ -15,6 +15,7 @@ class Listing(models.Model):
     listed_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
     created_at = models.DateTimeField(auto_now_add=True) 
     highest_bid = models.FloatField(blank=True)
+    watched_by = models.ManyToManyField(User, blank=True, related_name="watchlist")
 
     def __str__(self):
         return f"{self.title} - Price: {self.min_price} - Listed by: {self.listed_by}"

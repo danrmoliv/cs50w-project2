@@ -88,10 +88,20 @@ def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
     form_bid = BidForm(user=request.user)
+    print("aaaaaaaaaaaaaaaa")
+
+    print(listing.watched_by.all())
+
+    user = request.user
+    watched_by_user = False
+
+    if user in listing.watched_by.all():
+        watched_by_user = True
 
     return render(request, "auctions/listings.html", {
         "listing": listing,
-        'form_bid': form_bid
+        'form_bid': form_bid,
+        'watched_by_user': watched_by_user
     })
 
 def listing_new(request):
@@ -124,17 +134,26 @@ def listing_new(request):
             "form": form
         })
 
+def add_to_watchlist(request, listing_id):
 
-# def listing_add(request):
+    if request.method == 'POST':
+        print("Trying to add to watchlist")
 
-#     if request.method == 'POST':
+        listing = Listing.objects.get(id=listing_id)
 
-#         form = ListingForm(request.POST)
+        user = request.user
 
-#         if form.is_valid():
+        listing.watched_by.add(user)
 
+        return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
+    
+def watchlist(request):
+    user = request.user
 
-#     form = ListingForm()
-#     return render(request, "auctions/add_listing.html", {
-#         "form": form
-#     })
+    #listings = Listing.objects.all()
+
+    listing_watch = Listing.objects.filter(watched_by = user).all()
+
+    return render(request, "auctions/watchlist.html", {
+        "listings": listing_watch
+    })

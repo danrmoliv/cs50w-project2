@@ -2,7 +2,24 @@
 {% load bootstrap %}
 
 {% block body %}
-    <h2>Listing: {{listing.title}}</h2>
+    {% if user.is_authenticated %}  
+        {% if watched_by_user %}
+            <form action="" method="">
+                {% csrf_token %}
+                <input type="submit" value="Remove from Watchlist" class="btn btn-secondary btn-sm">  
+            </form>  
+        {% else %}
+            <form action="{% url 'auctions:add_to_watchlist' listing.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Add to Watchlist" class="btn btn-secondary btn-sm">  
+            </form> 
+        {% endif %}    
+        <br>
+    {% endif %}    
+
+    <h2>Listing: {{listing.title}}</h2>  
+
+    <br>
 
     <img src="{{ listing.image_url }}" alt="" width="500">
 
@@ -11,6 +28,7 @@
 
     {% if user.is_authenticated %}
         <form action="">
+            {% csrf_token %}
             {{ form_bid|bootstrap }}
             <input type="submit" value="Place Bid" class="btn btn-primary">  
         </form>

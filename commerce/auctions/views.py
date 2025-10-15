@@ -88,7 +88,6 @@ def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
     form_bid = BidForm(user=request.user)
-    print("aaaaaaaaaaaaaaaa")
 
     print(listing.watched_by.all())
 
@@ -137,7 +136,6 @@ def listing_new(request):
 def add_to_watchlist(request, listing_id):
 
     if request.method == 'POST':
-        print("Trying to add to watchlist")
 
         listing = Listing.objects.get(id=listing_id)
 
@@ -157,3 +155,15 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html", {
         "listings": listing_watch
     })
+
+def remove_from_watchlist(request, listing_id):
+
+    if request.method == 'POST':
+        
+        listing = Listing.objects.get(id=listing_id)
+
+        user = request.user
+
+        listing.watched_by.remove(user)
+
+        return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))

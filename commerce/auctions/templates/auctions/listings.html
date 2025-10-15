@@ -4,7 +4,7 @@
 {% block body %}
     {% if user.is_authenticated %}  
         {% if watched_by_user %}
-            <form action="" method="">
+            <form action="{% url 'auctions:remove_from_watchlist' listing.id %}" method="post">
                 {% csrf_token %}
                 <input type="submit" value="Remove from Watchlist" class="btn btn-secondary btn-sm">  
             </form>  

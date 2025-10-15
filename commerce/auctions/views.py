@@ -96,7 +96,16 @@ def register(request):
 def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
-    print(listing.bids_on_product.all())
+    bid_text_info = False
+
+    total_bids = len(listing.bids_on_product.all())
+    if (total_bids > 0) and (request.user == listing.highest_bid_user):
+        bid_text_info = f"{total_bids} bids so far. Your bid is the current bid."
+        #print(bid_text_info) 
+    elif total_bids > 0:
+        bid_text_info = f"{total_bids} bids so far."
+        #print(bid_text_info) 
+
 
     if float(listing.highest_bid) > float(listing.min_price):
         min_value_bid = float(listing.highest_bid) + 0.01
@@ -104,8 +113,6 @@ def listing_view(request, listing_id):
         min_value_bid = float(listing.min_price) - 0.000001
 
     form_bid = BidForm(user=request.user, min_price=min_value_bid)
-
-    print(listing.watched_by.all())
 
     user = request.user
     watched_by_user = False
@@ -116,7 +123,8 @@ def listing_view(request, listing_id):
     return render(request, "auctions/listings.html", {
         "listing": listing,
         'form_bid': form_bid,
-        'watched_by_user': watched_by_user
+        'watched_by_user': watched_by_user,
+        'bid_text_info': bid_text_info
     })
 
 def place_bid(request, listing_id):

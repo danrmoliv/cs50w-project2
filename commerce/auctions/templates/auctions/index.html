@@ -15,7 +15,11 @@
                     <div class="col-sm-6">
 
                         <a href="{% url 'auctions:listing' listing.id %}"><h2>{{ listing.title }} </h2></a>
-                        <h3>Price: $ {{  listing.min_price }}</h3>
+                        {% if listing.highest_bid > listing.min_price %}
+                            <h3>Price: $ {{ listing.highest_bid }}</h3>
+                        {% else %}
+                            <h3>Price: $ {{ listing.min_price }}</h3>
+                        {% endif %}
                         <p>{{ listing.description }} </p>
                         <p>Created at {{ listing.created_at }} </p>
 

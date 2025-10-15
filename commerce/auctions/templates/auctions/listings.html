@@ -24,12 +24,20 @@
     <img src="{{ listing.image_url }}" alt="" width="500">
 
     <p>{{ listing.description }}</p>
-    <h2>$ {{ listing.min_price }}</h2>
+
+    {% if listing.highest_bid > listing.min_price %}
+        <h2>$ {{ listing.highest_bid }}</h2>
+    {% else %}
+        <h2>$ {{ listing.min_price }}</h2>
+    {% endif %}
 
     {% if user.is_authenticated %}
         <form action="{% url 'auctions:place_bid' listing.id %}" method="post">
             {% csrf_token %}
             {{ form_bid|bootstrap }}
+            {% if bid_text_info %}
+                <p>{{ bid_text_info }}</p>
+            {% endif %}
             <input type="submit" value="Place Bid" class="btn btn-primary">  
         </form>
     {% endif %}

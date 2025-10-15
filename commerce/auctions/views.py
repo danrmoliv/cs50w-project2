@@ -97,6 +97,12 @@ def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
     bid_text_info = False
+    user_owner_listing = False
+
+    if listing.listed_by == request.user:
+        user_owner_listing = True
+    
+    print(user_owner_listing)
 
     total_bids = len(listing.bids_on_product.all())
     if (total_bids > 0) and (request.user == listing.highest_bid_user):
@@ -124,7 +130,8 @@ def listing_view(request, listing_id):
         "listing": listing,
         'form_bid': form_bid,
         'watched_by_user': watched_by_user,
-        'bid_text_info': bid_text_info
+        'bid_text_info': bid_text_info,
+        'user_owner_listing': user_owner_listing
     })
 
 def place_bid(request, listing_id):
@@ -225,3 +232,16 @@ def remove_from_watchlist(request, listing_id):
         listing.watched_by.remove(user)
 
         return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
+    
+
+def close_auction(request, listing_id):
+
+    if request.method == 'POST':
+
+        listing = Listing.objects.get(id=listing_id)
+        listing.is_available = False
+
+        listing.save()
+
+        return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
+ 

@@ -3,27 +3,31 @@
 
 {% block body %}
     {% if user.is_authenticated %}  
-        {% if watched_by_user %}
-            <form action="{% url 'auctions:remove_from_watchlist' listing.id %}" method="post">
-                {% csrf_token %}
-                <input type="submit" value="Remove from Watchlist" class="btn btn-secondary btn-sm">  
-            </form>  
-        {% else %}
-            <form action="{% url 'auctions:add_to_watchlist' listing.id %}" method="post">
-                {% csrf_token %}
-                <input type="submit" value="Add to Watchlist" class="btn btn-secondary btn-sm">  
-            </form> 
+        {% if not user_owner_listing %}
+            {% if watched_by_user %}
+                <form action="{% url 'auctions:remove_from_watchlist' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Remove from Watchlist" class="btn btn-secondary btn-sm">  
+                </form>  
+            {% else %}
+                <form action="{% url 'auctions:add_to_watchlist' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Add to Watchlist" class="btn btn-secondary btn-sm">  
+                </form> 
+            {% endif %}
         {% endif %}    
         <br>
     {% endif %}    
 
     <h2>Listing: {{listing.title}}</h2>  
 
+
     <br>
 
     <img src="{{ listing.image_url }}" alt="" width="500">
 
     <p>{{ listing.description }}</p>
+    
 
     {% if listing.highest_bid > listing.min_price %}
         <h2>$ {{ listing.highest_bid }}</h2>
@@ -31,15 +35,26 @@
         <h2>$ {{ listing.min_price }}</h2>
     {% endif %}
 
+    {% if not listing.is_available %}
+        <div class="alert alert-primary" role="alert">
+            Item not available for bids
+        </div>
+    {% endif %}
+
+
     {% if user.is_authenticated %}
-        <form action="{% url 'auctions:place_bid' listing.id %}" method="post">
-            {% csrf_token %}
-            {{ form_bid|bootstrap }}
-            {% if bid_text_info %}
-                <p>{{ bid_text_info }}</p>
-            {% endif %}
-            <input type="submit" value="Place Bid" class="btn btn-primary">  
-        </form>
+
+        {% if bid_text_info %}
+            <p>{{ bid_text_info }}</p>
+        {% endif %}
+
+        {% if not user_owner_listing and listing.is_available %}
+            <form action="{% url 'auctions:place_bid' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ form_bid|bootstrap }}
+                <input type="submit" value="Place Bid" class="btn btn-primary">  
+            </form>
+        {% endif %}
     {% endif %}
     
     <br>
@@ -52,5 +67,14 @@
             <li>Category: No Category Listed</li>
         {% endif %}
     </ul>
+
+    
+
+    {% if user_owner_listing and listing.is_available %}
+        <form action="{% url 'auctions:close_auction' listing.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Close Auction" class="btn btn-outline-danger btn-sm">  
+        </form>   
+    {% endif %}
     
 {% endblock %}

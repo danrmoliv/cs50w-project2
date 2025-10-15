@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from django.forms import ModelForm
+from django.forms import ModelForm, ValidationError
 from .models import User, Listing, Bid, Comment
 
 class ListingForm(ModelForm):
@@ -23,8 +23,17 @@ class BidForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
+        self.min_price = kwargs.pop('min_price', 0)
 
+        super().__init__(*args, **kwargs)        
+    
+        self.fields['bid_value'].widget.attrs['min'] = round(self.min_price, 2)
+
+    def clean_price(self):
+        bid = self.cleaned_data['bid_value']
+        if bid <= self.min_price:
+            raise ValidationError(f"Bid cannot be less than {self.min_price:2f}")
+        return bid
 
 
 def index(request):
@@ -87,7 +96,14 @@ def register(request):
 def listing_view(request, listing_id):
     listing = Listing.objects.get(id=listing_id)
 
-    form_bid = BidForm(user=request.user)
+    print(listing.bids_on_product.all())
+
+    if float(listing.highest_bid) > float(listing.min_price):
+        min_value_bid = float(listing.highest_bid) + 0.01
+    else:
+        min_value_bid = float(listing.min_price) - 0.000001
+
+    form_bid = BidForm(user=request.user, min_price=min_value_bid)
 
     print(listing.watched_by.all())
 
@@ -103,10 +119,44 @@ def listing_view(request, listing_id):
         'watched_by_user': watched_by_user
     })
 
+def place_bid(request, listing_id):
+    listing = Listing.objects.get(id=listing_id)
+
+    if float(listing.highest_bid) > float(listing.min_price):
+        min_value_bid = float(listing.highest_bid) + 0.01
+    else:
+        min_value_bid = float(listing.min_price) - 0.000001
+
+    form_bid = BidForm(user=request.user, min_price=min_value_bid)
+
+    if request.method == 'POST':
+        print('request.method == POST - Make BID')
+
+        form_bid = BidForm(request.POST, user=request.user)
+
+        if form_bid.is_valid():
+            new_bid = Bid(product = listing,
+                          bid_value = form_bid.cleaned_data['bid_value'],
+                          user_bid = form_bid.user)
+            print(new_bid)
+            print(form_bid.cleaned_data['bid_value'])
+
+            print("Saving Bid")
+            new_bid.save()
+
+            listing.highest_bid = new_bid.bid_value
+            listing.highest_bid_user = new_bid.user_bid
+            listing.save()
+
+            print(listing)
+    
+    return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
+
+
+
 def listing_new(request):
     
     if request.method == 'POST':
-        print('request.method == POST')
 
         form = ListingForm(request.POST, user=request.user)
 
@@ -159,7 +209,7 @@ def watchlist(request):
 def remove_from_watchlist(request, listing_id):
 
     if request.method == 'POST':
-        
+
         listing = Listing.objects.get(id=listing_id)
 
         user = request.user

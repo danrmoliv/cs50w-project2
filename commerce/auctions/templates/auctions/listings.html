@@ -27,7 +27,7 @@
     <h2>$ {{ listing.min_price }}</h2>
 
     {% if user.is_authenticated %}
-        <form action="">
+        <form action="{% url 'auctions:place_bid' listing.id %}" method="post">
             {% csrf_token %}
             {{ form_bid|bootstrap }}
             <input type="submit" value="Place Bid" class="btn btn-primary">  

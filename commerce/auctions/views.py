@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 
-from django.forms import ModelForm, ValidationError
+from django.forms import ModelForm, ValidationError, Textarea
 from .models import User, Listing, Bid, Comment
 
 class ListingForm(ModelForm):
@@ -20,6 +20,9 @@ class BidForm(ModelForm):
     class Meta:
         model = Bid
         fields = ['bid_value']
+        labels = {
+            'bid_value': '', 
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -34,6 +37,22 @@ class BidForm(ModelForm):
         if bid <= self.min_price:
             raise ValidationError(f"Bid cannot be less than {self.min_price:2f}")
         return bid
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['comment']
+        widgets = {
+            'comment': Textarea(attrs={'rows': 4}),
+        }
+        labels = {
+            'comment': '', 
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
 
 
 def index(request):
@@ -94,6 +113,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def listing_view(request, listing_id):
+    
     listing = Listing.objects.get(id=listing_id)
 
     bid_text_info = False
@@ -105,7 +125,11 @@ def listing_view(request, listing_id):
     print(user_owner_listing)
 
     total_bids = len(listing.bids_on_product.all())
-    if (total_bids > 0) and (request.user == listing.highest_bid_user):
+
+    if (listing.is_available == False) and (request.user == listing.highest_bid_user):
+        bid_text_info = f"You won the auction with your bid of $ {listing.highest_bid}."
+
+    elif (total_bids > 0) and (request.user == listing.highest_bid_user):
         bid_text_info = f"{total_bids} bids so far. Your bid is the current bid."
         #print(bid_text_info) 
     elif total_bids > 0:
@@ -119,6 +143,7 @@ def listing_view(request, listing_id):
         min_value_bid = float(listing.min_price) - 0.000001
 
     form_bid = BidForm(user=request.user, min_price=min_value_bid)
+    comment_form = CommentForm(user=request.user)
 
     user = request.user
     watched_by_user = False
@@ -131,7 +156,9 @@ def listing_view(request, listing_id):
         'form_bid': form_bid,
         'watched_by_user': watched_by_user,
         'bid_text_info': bid_text_info,
-        'user_owner_listing': user_owner_listing
+        'user_owner_listing': user_owner_listing,
+        'comment_form': comment_form,
+        "comments": listing.comments.all()
     })
 
 def place_bid(request, listing_id):
@@ -242,6 +269,23 @@ def close_auction(request, listing_id):
         listing.is_available = False
 
         listing.save()
+
+        return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
+ 
+ 
+def add_comment(request, listing_id):
+
+    if request.method == 'POST':
+
+        listing = Listing.objects.get(id=listing_id)
+        
+        comment_form = CommentForm(request.POST, user=request.user)
+
+        if comment_form.is_valid():
+            new_comment = Comment(product = listing,
+                          comment = comment_form.cleaned_data['comment'],
+                          user_comment = comment_form.user)
+            new_comment.save()
 
         return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
  

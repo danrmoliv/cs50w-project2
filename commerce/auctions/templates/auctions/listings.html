@@ -76,5 +76,22 @@
             <input type="submit" value="Close Auction" class="btn btn-outline-danger btn-sm">  
         </form>   
     {% endif %}
+
+    <br>
+    <h2>Comments:</h2>
+    {% for comment in comments %}
+    <ul>
+        <li><strong>{{ comment.user_comment }}</strong>
+        <p>{{ comment.comment }}</p>
+        </li>
+    </ul>
+    {% endfor %}
+    {% if user.is_authenticated %}
+        <form action="{% url 'auctions:add_comment' listing.id %}" method="post">
+            {% csrf_token %}
+            {{ comment_form|bootstrap }}
+            <input type="submit" value="Place Comment" class="btn btn-primary">  
+        </form>
+    {% endif %}
     
 {% endblock %}

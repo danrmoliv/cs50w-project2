@@ -1,0 +1,31 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Category: {{ category }}</h2>
+    
+    {% for listing in listings %}
+
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <img src="{{ listing.image_url }}" alt="" height="150">
+                </div>
+                <div class="col-sm-6">
+
+                    <a href="{% url 'auctions:listing' listing.id %}"><h2>{{ listing.title }} </h2></a>
+                    {% if listing.highest_bid > listing.min_price %}
+                        <h3>Price: $ {{ listing.highest_bid }}</h3>
+                    {% else %}
+                        <h3>Price: $ {{ listing.min_price }}</h3>
+                    {% endif %}
+                    
+                    <p>{{ listing.description }} </p>
+                    <p>Created at {{ listing.created_at }} </p>
+
+                </div>
+            </div>
+        </div>
+          
+    {% endfor %}
+    
+{% endblock %}

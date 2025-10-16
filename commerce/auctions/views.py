@@ -289,3 +289,23 @@ def add_comment(request, listing_id):
 
         return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
  
+def categories(request):
+    listings = Listing.objects.all()
+    categories_list = set([listing.category for listing in listings if listing.category])
+
+
+    return render(request, "auctions/categories.html", {
+        "categories": categories_list
+    })
+
+
+def categories_items(request, category_name):
+
+    listings_in_category = Listing.objects.filter(category = category_name).all()
+
+    print(listings_in_category)
+
+    return render(request, "auctions/category_items.html", {
+        "listings": listings_in_category,
+        "category": category_name
+    })

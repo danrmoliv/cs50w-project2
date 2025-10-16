@@ -62,7 +62,7 @@
     <ul>
         <li>Listed by: {{ listing.listed_by }}</li>
         {% if listing.category %}
-            <li>Category: {{ listing.category }}</li>
+            <li>Category: <a href="{% url 'auctions:categories_items' listing.category %}">{{ listing.category }}</a></li>
         {% else %}
             <li>Category: No Category Listed</li>
         {% endif %}

@@ -6,6 +6,7 @@ from django.urls import reverse
 
 from django.forms import ModelForm, ValidationError, Textarea
 from .models import User, Listing, Bid, Comment
+from django.contrib.auth.decorators import login_required
 
 class ListingForm(ModelForm):
     class Meta:
@@ -195,7 +196,7 @@ def place_bid(request, listing_id):
     return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
 
 
-
+@login_required
 def listing_new(request):
     
     if request.method == 'POST':
@@ -225,6 +226,7 @@ def listing_new(request):
             "form": form
         })
 
+@login_required
 def add_to_watchlist(request, listing_id):
 
     if request.method == 'POST':
@@ -236,7 +238,8 @@ def add_to_watchlist(request, listing_id):
         listing.watched_by.add(user)
 
         return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
-    
+
+@login_required
 def watchlist(request):
     user = request.user
 
@@ -248,6 +251,7 @@ def watchlist(request):
         "listings": listing_watch
     })
 
+@login_required
 def remove_from_watchlist(request, listing_id):
 
     if request.method == 'POST':
@@ -260,7 +264,7 @@ def remove_from_watchlist(request, listing_id):
 
         return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
     
-
+@login_required
 def close_auction(request, listing_id):
 
     if request.method == 'POST':
@@ -272,7 +276,7 @@ def close_auction(request, listing_id):
 
         return HttpResponseRedirect(reverse("auctions:listing", kwargs={"listing_id": listing.id}))
  
- 
+@login_required
 def add_comment(request, listing_id):
 
     if request.method == 'POST':
